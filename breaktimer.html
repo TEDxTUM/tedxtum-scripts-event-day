@@ -1,0 +1,184 @@
+
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>TEDxTUM Break Timer</title>
+
+  <style>
+  	body {
+		background-color:#000;
+		color:#fff;
+		font-size:50vh;
+	}
+	#button {
+		display:table-row;
+		width:100%;
+		height:75vh;
+		vertical-align: middle;
+  		text-align: center;
+	}
+	div.#timer {
+		display:inline-block;
+		text-align:center;
+		width:100%;
+		margin:0px auto 0px auto;
+		
+	}
+	div#timer.pulse {
+		display:inline-block;
+		text-align:center;
+		width:100%;
+		margin:0px auto 0px auto;
+		-webkit-animation: pulse 1s linear infinite;
+		animation: pulse 1s linear infinite;
+	}
+	#logo {
+		display:block;
+		height:10vh;
+		margin: 0px auto;
+	}
+	#heading {
+		display:block;
+		height:10vh;
+		margin: 5vh auto -10vh auto;
+		font-size:0.1em;
+		color:#e62b1e;
+	}
+
+	.red {
+		color:#e62b1e;
+	}
+
+	@-webkit-keyframes pulse {
+	 0% {
+	 -webkit-transform: scale(1, 1);
+	}
+	 50% {
+	 -webkit-transform: scale(1.05, 1.05);
+	}
+	 100% {
+	 -webkit-transform: scale(1, 1);
+	};
+	}
+
+	@keyframes pulse {
+	 0% {
+	 transform: scale(1, 1);
+	}
+	 50% {
+	 transform: scale(1.05, 1.05);
+	}
+	 100% {
+	transform: scale(1, 1);
+	};
+	}
+  </style>
+
+</head>
+
+<body>
+  <script type="text/javascript">
+  	
+  	// SETTINGS
+  	var gong = new Audio('gong.mp3');
+  	
+  	// get time from URL parameter
+	var urlTime = getURLParameter('time');
+	var hourMin = parseURLTime(urlTime);
+
+	var remainingSeconds;
+	var timerRunning = false;
+	var timerVar;
+  
+
+	function parseURLTime(urlTime) {
+		if(!urlTime || urlTime == "") {
+			console.log("WARNING: no date given in URL parameter! Counting down to end of the day.");
+			return [23,59];	
+		}
+		var hours = parseInt(urlTime.substr(0,2));
+		var minutes = parseInt(urlTime.substr(2,2));
+		hours = hours || 0;
+		minutes = minutes || 0;
+		console.log("Counting down to "+hours+" hours and "+minutes+" minutes.");
+		return [hours,minutes];
+	}
+
+	function initTimer(hours, minutes) {
+		var now = new Date();
+		var then = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0);
+		remainingSeconds = parseInt((then - now) / 1000);
+	}
+	
+	function countTimer() {
+	   if(remainingSeconds == 0) {
+	   	deactivateTimer();
+	   	return;
+	   }
+	   --remainingSeconds;
+	   var hour = Math.floor(remainingSeconds /3600);
+	   var minute = Math.floor((remainingSeconds)/60);
+	   var second = remainingSeconds - (hour*3600 + minute*60);
+
+	   //first gong
+	   if(minute == 9 && second == 59) {
+	   		gong.play();
+	   }
+	   //second gong and warning
+	   else if(minute == 5 && second == 0) {
+	   		gong.play();
+	   		document.getElementsByTagName("body")[0].className = "red";
+	   }
+	   //third gong
+	   else if(minute == 2 && second == 0) {
+	   		gong.play();
+	   }
+
+	   document.getElementById("timer").innerHTML = ("0" + minute).slice(-2) + ":" + ("0" + second).slice(-2);
+	}
+
+	function clickScreen() {
+		if (timerRunning) {
+			deactivateTimer();
+		} else {
+			activateTimer();
+		}
+	}
+
+	function activateTimer() {
+		initTimer(hourMin[0], hourMin[1]);
+		timerVar = setInterval(countTimer, 1000);
+		timerRunning = true;
+		togglePulsating("timer");
+	}
+
+	function deactivateTimer() {
+		clearInterval(timerVar);
+		timerRunning = false;
+		remainingSeconds = 0;
+		document.getElementById("timer").innerHTML = "00:00";
+		togglePulsating("timer");
+		document.getElementsByTagName("body")[0].className = ''
+	}
+
+	function togglePulsating(elementId) {
+		var element = document.getElementById(elementId);
+  		element.className = element.className ? '' : 'pulse';
+	}
+
+	function getURLParameter(name) {
+  		return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || null;
+	}
+
+  </script>
+<div style='display: table; width:100%;'>
+<div id="button" onclick="clickScreen()">
+<div id="heading">Session continues in</div>
+<div id="timer">00:00</div>
+</div>
+</div>
+<img id="logo" src="logo.png"/>
+</body>
+</html>

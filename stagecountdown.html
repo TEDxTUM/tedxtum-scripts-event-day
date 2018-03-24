@@ -1,0 +1,111 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>TEDxTUM: ENTELECHY</title>
+
+  <style>
+  	body {
+		background-color:#000;
+		color:#fff;
+		font-size:55vh;
+	}
+	#button {
+		display:table-row;
+		width:100%;
+		height:75vh;
+		vertical-align: middle;
+  		text-align: center;
+	}
+	#timer {
+		display:inline-block;
+		text-align:center;
+		width:100%;
+		margin:0px auto 0px auto;
+	}
+	#logo {
+		display:block;
+		height:10vh;
+		margin: 0px auto;
+	}
+  </style>
+
+</head>
+
+<body>
+  <script type="text/javascript">
+  	var timerRunning = false;
+	var timerVar;
+
+  	// get time from URL parameter
+	var urlTime = getURLParameter('time');
+	var remainingSeconds = parseURLTime(urlTime);
+
+	// set initial timer value
+	window.onload = function() {
+    	displayTime(remainingSeconds);
+	}
+
+	function parseURLTime(urlTime) {
+		if(!urlTime || urlTime == "") {
+			console.log("WARNING: no date given in URL parameter! Using 18 minutes as a default value.");
+			return 18*60;	
+		}
+		var minutes = parseInt(urlTime.substr(0,2));
+		minutes = minutes || 0;
+		console.log("Counting down from "+minutes+" minutes.");
+		return minutes * 60;
+	}
+
+	function countTimer() {
+	   if(remainingSeconds == 0) {
+	   	deactivateTimer();
+	   	return;
+	   }
+	   --remainingSeconds;
+	   displayTime(remainingSeconds);
+	}
+
+	function clickScreen() {
+		if (timerRunning) {
+			deactivateTimer();
+		} else {
+			activateTimer();
+		}
+	}
+
+	function displayTime(numSec) {
+		var hour = Math.floor(numSec /3600); // not displayed but used in calculation
+		var minute = Math.floor((numSec)/60);
+		var second = numSec - (hour*3600 + minute*60);
+		document.getElementById("timer").innerHTML = ("0" + minute).slice(-2) + ":" + ("0" + second).slice(-2);
+	}
+
+	function activateTimer() {
+		timerVar = setInterval(countTimer, 1000);
+		timerRunning = true
+	}
+
+	function deactivateTimer() {
+		clearInterval(timerVar);
+		timerRunning = false;
+		
+		// reset timer to original value
+		remainingSeconds = parseURLTime(urlTime);
+    	displayTime(remainingSeconds);
+	}
+
+	function getURLParameter(name) {
+  		return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || null;
+	}
+
+  </script>
+<div style='display: table; width:100%;'>
+<div id="button" onclick="clickScreen()">
+<div id="timer">00:00</div>
+</div>
+</div>
+<img id="logo" src="logo.png"/>
+</body>
+</html>
